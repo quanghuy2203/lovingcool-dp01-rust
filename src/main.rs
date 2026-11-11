@@ -5,6 +5,7 @@ mod sensors;
 mod wallpaper;
 mod worker;
 use std::sync::mpsc::{channel,sync_channel,Sender,Receiver};
+use std::time::Duration;
 use eframe::egui::{self,Color32,RichText,TextureHandle};
 use worker::{Settings,Mode,Command,Event};
 
