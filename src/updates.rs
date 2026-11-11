@@ -17,6 +17,11 @@ pub fn check_and_update(repo:&str,silent:bool)->Result<(),String>{
  c.spawn().map_err(|e|e.to_string())?;Ok(())
 }
 
+pub fn update_status()->Option<String>{
+ let path=config_file()?.parent()?.join("update.status");
+ let status=fs::read_to_string(path).ok()?;
+ Some(status.trim().to_string())
+}
 pub fn update_is_ready()->bool{
  if let Some(path)=config_file().and_then(|p|p.parent().map(|x|x.join("update.ready"))){
   if path.exists(){let _=fs::remove_file(path);return true;}
