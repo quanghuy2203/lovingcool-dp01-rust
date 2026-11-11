@@ -1,4 +1,4 @@
-# LovingCool DP-01 Studio — Rust port (v0.2.0 prototype)
+# LovingCool DP-01 Studio — Rust port (v0.2.1 prototype)
 
 > Windows 10/11, x64. **Bản source chưa được kiểm tra biên dịch/chạy trên DP-01 thật**. Không điều khiển LED/RGB; chỉ có điều khiển màn LCD USB đã nhận diện, và phần hiển thị thông số PC.
 
@@ -13,7 +13,7 @@ Refactor từ `LovingCool1.rar` (C# WinForms, `MainForm.cs`, `HardwareSensors.cs
 - USB/COM **chỉ** nhận diện VID/PID `33C3:7791` và `33C3:7788`, xác thực thông tin thiết bị trước khi gửi ảnh. Không đảm bảo DP-01 của bạn thuộc loại này.
 - Công việc cảm biến/ảnh ở thread riêng, hàng chờ ảnh giới hạn 2 thông báo, FPS 1–15, preview 2 giây khi Dashboard đứng yên; không giữ toàn bộ frame GIF trong RAM. GIF disposal "Previous" chưa hoàn chỉnh; một số GIF có thể sai hình.
 - Settings lưu tại `%LOCALAPPDATA%\LovingCoolRust\settings.json`.
-- GitHub Releases: script cập nhật dùng PowerShell, chỉ gọi ở khởi động/on-demand, không chạy dịch vụ polling suốt thời gian idle. Release ZIP có checksum SHA-256; kiểm tra checksum bảo vệ lỗi tải dữ liệu, **không phải chữ ký mật mã chống việc tài khoản GitHub bị chiếm**.
+- GitHub Releases: nút cập nhật trong ứng dụng gọi PowerShell khi người dùng yêu cầu; không chạy dịch vụ kiểm tra cập nhật suốt thời gian idle. Release ZIP có checksum SHA-256; kiểm tra checksum bảo vệ lỗi tải dữ liệu, **không phải chữ ký mật mã chống việc tài khoản GitHub bị chiếm**.
 
 ### Yêu cầu / Build
 
@@ -37,14 +37,13 @@ gh auth login
 
 Script **tạo repository mới** trong tài khoản `gh` đang đăng nhập và push `main` (mặc định public; dùng `-Private` nếu muốn private). Nếu tên repo đã tồn tại, script sẽ lỗi, không ghi đè. Trong app, trường `Repository` mặc định là `quanghuy2203/lovingcool-dp01-rust`, có thể sửa.
 
-Tạo release đầu tiên:
+### Phát hành và cập nhật tự động
 
-```powershell
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-GitHub Actions chạy Windows, `cargo check`, `cargo build --release`, gói ZIP, sinh SHA-256, tải artifact cho mọi build và đăng Release khi có tag `v*.*.*`. Để updater tìm được bản mới, tăng `version` trong `Cargo.toml` và push tag tương ứng. `update.ps1` tải release mới, kiểm SHA-256, báo ứng dụng thoát rồi thay EXE và khởi động lại. Ứng dụng không tự cập nhật nếu chưa có GitHub Release hợp lệ.
+- Sau khi mã nguồn được đẩy lên nhánh `main`, GitHub Actions tự kiểm tra, build Windows, đóng gói EXE và tạo Release khi `version` trong `Cargo.toml` là phiên bản mới chưa có tag.
+- Không cần chạy lệnh `git tag` hay `git push origin <tag>` thủ công để phát hành. Tăng `Cargo.toml` version cho mỗi bản mới.
+- Trong ứng dụng, nhấn **Kiểm tra, tải và cài bản mới**. Updater sẽ tải Release mới nhất, xác minh SHA-256, giải nén trước, đóng app, thay EXE rồi khởi động lại. Cài đặt/giải nén phải nằm tại thư mục mà người dùng có quyền ghi.
+- Không cần Git hay GitHub CLI trên máy sử dụng ứng dụng. Lần đầu cần tải bản Release, những lần sau cập nhật từ giao diện.
+- Nút cập nhật chỉ hoạt động với gói Release có ZIP và checksum; SHA-256 xác minh tính toàn vẹn, không thay thế chữ ký phần mềm.
 
 ### Giới hạn quan trọng
 
