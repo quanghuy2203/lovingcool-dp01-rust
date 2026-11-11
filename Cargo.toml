@@ -1,0 +1,25 @@
+[package]
+name = "lovingcool-dp01-studio"
+version = "0.2.0"
+edition = "2021"
+
+[dependencies]
+eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow"] }
+sysinfo = "0.33"
+serialport = "4.7"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "gif"] }
+imageproc = "0.25"
+ab_glyph = "0.2"
+gif = "0.13"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_Graphics_Gdi", "Win32_UI_WindowsAndMessaging"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+opt-level = "s"
+strip = true
+panic = "abort"
