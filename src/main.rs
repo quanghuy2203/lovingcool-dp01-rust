@@ -13,7 +13,7 @@ struct Studio {
  tx:Sender<Command>,rx:Receiver<Event>,settings:Settings,
  ports:Vec<String>,selected:String,status:String,stats:sensors::Stats,
  texture:Option<TextureHandle>,connected:bool,
- wallpaper_exe:String,wallpaper_project:String,update_repo:String,
+ wallpaper_exe:String,wallpaper_project:String,
 }
 impl Studio {
  fn new(cc:&eframe::CreationContext<'_>)->Self {
@@ -25,7 +25,7 @@ impl Studio {
   cc.egui_ctx.set_style(style);
   let (tx,rx_worker)=channel();let (tx_event,rx)=sync_channel(2);worker::start(rx_worker,tx_event);
   let defaults=updates::load_settings().unwrap_or_default();let _=tx.send(Command::Config(defaults.clone()));
-  Self{tx,rx,settings:defaults,ports:vec![],selected:String::new(),status:"Chưa kết nối LCD — preview vẫn hoạt động".into(),stats:Default::default(),texture:None,connected:false,wallpaper_exe:r"C:\Program Files (x86)\Steam\steamapps\common\wallpaper_engine\wallpaper64.exe".into(),wallpaper_project:String::new(),update_repo:"quanghuy2203/lovingcool-dp01-rust".into()}
+  Self{tx,rx,settings:defaults,ports:vec![],selected:String::new(),status:"Chưa kết nối LCD — preview vẫn hoạt động".into(),stats:Default::default(),texture:None,connected:false,wallpaper_exe:r"C:\Program Files (x86)\Steam\steamapps\common\wallpaper_engine\wallpaper64.exe".into(),wallpaper_project:String::new()}
  }
  fn changed(&self){let _=self.tx.send(Command::Config(self.settings.clone()));updates::save_settings(&self.settings);}
  fn metric(ui:&mut egui::Ui,name:&str,val:String,percent:Option<f32>){
@@ -93,12 +93,16 @@ impl eframe::App for Studio {
    ui.label("• Đọc sensor mỗi 2 giây");ui.label("• Dashboard tĩnh không render liên tục");
    ui.label("• GIF giải mã từng khung hình");ui.label("• Giới hạn ảnh động tối đa 15 FPS");
    ui.label("• Không nhúng trình duyệt vào tiến trình Rust");
-   ui.separator();ui.heading("Cập nhật từ GitHub Releases");
-   ui.label("Repository (owner/repo):");ui.text_edit_singleline(&mut self.update_repo);
-   if ui.button("Kiểm tra và cài bản mới").clicked(){
-    match updates::check_and_update(&self.update_repo,false){Ok(())=>self.status="Đã mở trình kiểm tra cập nhật".into(),Err(e)=>self.status=e}
+   ui.separator();ui.heading("Cập nhật ứng dụng");
+   ui.label(format!("Phiên bản hiện tại: v{}",env!("CARGO_PKG_VERSION")));
+   if ui.button("Kiểm tra, tải và cài bản mới").clicked(){
+    match updates::check_and_update("quanghuy2203/lovingcool-dp01-rust",false){
+     Ok(())=>self.status="Đang kiểm tra bản cập nhật trên GitHub…".into(),
+     Err(e)=>self.status=e
+    }
    }
-   ui.label(RichText::new("Bản mới chỉ được cài nếu có Release, gói ZIP và checksum SHA-256 hợp lệ.").small());
+   if let Some(status)=updates::update_status(){ui.label(status);}
+   ui.label(RichText::new("Tải và kiểm tra SHA-256 trước khi đóng app, thay EXE rồi mở lại. Không cần Git hoặc GitHub CLI.").small());
    ui.add_space(20.);
    });
   });
@@ -124,8 +128,6 @@ impl eframe::App for Studio {
  }
 }
 fn main()->eframe::Result<()> {
- // One short-lived update check after startup; no resident polling process.
- let _=updates::check_and_update("quanghuy2203/lovingcool-dp01-rust",true);
  let opts=eframe::NativeOptions{viewport:egui::ViewportBuilder::default().with_inner_size([1100.,740.]).with_min_inner_size([790.,560.]),..Default::default()};
  eframe::run_native("LovingCool DP-01 Studio",opts,Box::new(|cc|Ok(Box::new(Studio::new(cc)))))
 }
