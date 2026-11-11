@@ -42,6 +42,8 @@ jobs:
           if (!$line) { throw 'Missing Cargo.toml package version' }
           $tag = "v" + $line.Matches[0].Groups[1].Value
           "tag=$tag" >> $env:GITHUB_OUTPUT
+          $tip = (git ls-remote origin refs/heads/main) -split "\\s+" | Select-Object -First 1
+          if ($tip -ne $env:GITHUB_SHA) { "publish=false" >> $env:GITHUB_OUTPUT; exit 0 }
           git ls-remote --exit-code --tags origin "refs/tags/$tag" | Out-Null
           if ($LASTEXITCODE -eq 0) { "publish=false" >> $env:GITHUB_OUTPUT }
           else { "publish=true" >> $env:GITHUB_OUTPUT }
