@@ -11,7 +11,7 @@ pub fn launch(exe:&str,project:&str,width:u32,height:u32)->Result<(),String> {
 #[cfg(windows)]
 pub fn capture(width:u32,height:u32)->Result<image::RgbImage,String>{
  use windows_sys::Win32::{Graphics::Gdi::*,UI::WindowsAndMessaging::*};
- use std::ptr::{null,null_mut};
+ use std::ptr::null;
  let title:Vec<u16>=WINDOW_TITLE.encode_utf16().chain(std::iter::once(0)).collect();
  unsafe {
   let hwnd=FindWindowW(null(),title.as_ptr());
