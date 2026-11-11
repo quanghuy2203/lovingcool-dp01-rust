@@ -41,7 +41,7 @@ fn read_lhm(s:&mut Stats) {
 fn walk(v:&serde_json::Value,parent:&str,s:&mut Stats) {
  let title=v["Text"].as_str().unwrap_or("");
  let parent_l=parent.to_ascii_lowercase(); let low=title.to_ascii_lowercase();
- if let Some(val)=v["Value"].as_str().and_then(|x|x.split_whitespace().next()).and_then(|x|x.replace(',','.').parse::<f32>().ok()) {
+ if let Some(val)=v["Value"].as_str().and_then(|x|x.split_whitespace().next()).and_then(|x|x.replace(',',".").parse::<f32>().ok()) {
    if parent_l.contains("temperature") && (low.contains("cpu package")||low.contains("cpu core")) && s.cpu_temp.is_none(){s.cpu_temp=Some(val);}
    if parent_l.contains("temperature") && (low.contains("gpu core")||low.contains("gpu hot spot")) && s.gpu_temp.is_none(){s.gpu_temp=Some(val);}
    if parent_l.contains("load") && low.contains("gpu core") {s.gpu_load=Some(val);}
